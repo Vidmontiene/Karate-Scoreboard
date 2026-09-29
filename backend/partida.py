@@ -3,11 +3,15 @@ import time
 from pynput import keyboard
 import questionary
 from tabulate import tabulate
+from rich.table import Table
+from rich.console import Console
+
+console = Console()
 
 class Partida:
 
   # Construtor
-  def __init__(self, aka : Atleta, ao : Atleta, duracao : int, orientacao : int):
+  def __init__(self, aka : Atleta, ao : Atleta, duracao : int, orientacao : str):
     self.aka = aka  
     self.ao = ao
     self.duracao = duracao
@@ -77,18 +81,28 @@ class Partida:
     self.terminada = True
     return self.vencedor
     
-  # toString
-  def __str__(self):
+  # Mostra os valores de aka e ao
+  def valores(self):
     aka = self.aka
     ao = self.ao
 
-    linhas = [
-      [aka.pontos, ao.pontos],
-      ["|" if aka.senshu else "", "|" if ao.senshu else ""],
-      [f'{"x" * aka.penalidades}', f'{"x" * ao.penalidades}']
-    ]
+    tabela = Table()
+    tabela.add_column(f"[bold red]Aka[/]", width=20, justify="center")
+    tabela.add_column(f"[bold blue]Ao[/]", width=20, justify="center")
 
-    return tabulate(linhas, headers=["Aka", "Ao"], tablefmt="grid")
+    tabela.add_row(
+      str(aka.pontos), str(ao.pontos)
+    )
+
+    tabela.add_row(
+      "|" if aka.senshu else "", "|" if ao.senshu else ""
+    )
+
+    tabela.add_row(
+      f'{"x" * aka.penalidades}', f'{"x" * ao.penalidades}'
+    )
+
+    return tabela
 
   # Detecta espaço
   def on_press(self, key):
@@ -105,24 +119,36 @@ class Partida:
       mins, segs = divmod(self.duracao, 60)
       tempo_formatado = f'{mins:02d}:{segs:02d}'
       
-      print(tempo_formatado)
-      print(self)
+      console.print(
+        f"[bold]{tempo_formatado}[/]",
+        justify="center",
+        width=40
+      )
+      console.print(self.valores())
       self.duracao -= 1
       time.sleep(1)
 
   # Placar quando está em yame
   def placar_yame(self, pergunta=True):
     print("\033[H\033[J", end="")
+    
     mins, segs = divmod(self.duracao, 60)
     tempo_formatado = f'{mins:02d}:{segs:02d}'
-    print(tempo_formatado)
-    print(self)
+
+    console.print(
+      f"[bold]{tempo_formatado}[/]",
+      justify="center",
+      width=40
+    )
+
+    console.print(self.valores())
 
     if pergunta:
       self.perguntar()
 
   # Perguntas em yame
   def perguntar(self):
+    akao = ["Aka", "Ao"]
     opcao = questionary.select(
       "O que deseja fazer?",
       choices=[
@@ -144,10 +170,7 @@ class Partida:
     elif opcao == "Pontuar":
       opcao = questionary.select(
         "Quem deve pontuar?",
-        choices=[
-          "Aka",
-          "Ao",
-        ]
+        choices=akao
       ).ask()
       if opcao == None:
         self.placar_yame()
@@ -159,7 +182,7 @@ class Partida:
     elif opcao == "Penalizar":
       opcao = questionary.select(
         "Quem deve ser penalizado?",
-        choices=["Aka", "Ao"]
+        choices=akao
       ).ask()
 
       if opcao == None:
@@ -172,7 +195,7 @@ class Partida:
     elif opcao == "Remover Ponto":
       opcao = questionary.select(
         "Quem vai perder o ponto?",
-        choices=["Aka", "Ao"]
+        choices=akao
       ).ask()
 
       if opcao == None:
@@ -185,7 +208,7 @@ class Partida:
     elif opcao == "Senshu":
       opcao = questionary.select(
         "Quem vai ter seu senshu modificado?",
-        choices=["Aka", "Ao"]
+        choices=akao
       ).ask()
 
       if opcao == None:
