@@ -2,18 +2,27 @@ from atleta import Atleta
 import time
 from pynput import keyboard
 import questionary
-from tabulate import tabulate
 from rich.table import Table
 from rich.console import Console
 
 console = Console()
 
+# Constantes para orientação
+AKA_ESQ = 0
+AKA_DIR = 1
+
 class Partida:
 
   # Construtor
-  def __init__(self, aka : Atleta, ao : Atleta, duracao : int, orientacao : str):
-    self.aka = aka  
-    self.ao = ao
+  def __init__(self, aka : Atleta, ao : Atleta, duracao : int, orientacao : int):
+
+    if orientacao == AKA_ESQ:
+      self.esq= aka  
+      self.dir = ao
+    elif orientacao == AKA_DIR:
+      self.esq= ao 
+      self.dir = aka
+
     self.duracao = duracao
     self.hajime = False
     self.terminada = False  
@@ -22,8 +31,6 @@ class Partida:
 
     self.listener = keyboard.Listener(on_press=self.on_press)
     self.listener.start()
-
-    self.iniciar_placar_terminal()
 
   # Pontuar - Dá senshu e acaba se a diferença for de 8 pontos
   def ganhar_ponto(self, alvo : Atleta, outro : Atleta, pontos : int = 1):
@@ -63,43 +70,50 @@ class Partida:
 
   # Analisa quem ganhou
   def procura_vencedor(self):
-    if self.aka.penalidades >= 5:
-      self.vencedor = self.ao
-    elif self.ao.penalidades >= 5:
-      self.vencedor = self.aka
-    elif self.aka.pontos > self.ao.pontos:
-      self.vencedor = self.aka
-    elif self.ao.pontos > self.aka.pontos:
-      self.vencedor = self.ao
-    elif self.aka.senshu:
-      self.vencedor = self.aka
-    elif self.ao.senshu:
-      self.vencedor = self.ao
+    if self.esq.penalidades >= 5:
+      self.vencedor = self.dir
+    elif self.dir.penalidades >= 5:
+      self.vencedor = self.esq
+    elif self.esq.pontos > self.dir.pontos:
+      self.vencedor = self.esq
+    elif self.dir.pontos > self.esq.pontos:
+      self.vencedor = self.dir
+    elif self.esq.senshu:
+      self.vencedor = self.esq
+    elif self.dir.senshu:
+      self.vencedor = self.dir
     else:
       self.vencedor = Atleta("Empate")
 
     self.terminada = True
     return self.vencedor
-    
+
+  # Colore de acordo com o nome do objeto
+  def cor_atleta(self, atleta : Atleta):
+    if atleta.cor == "Aka":
+      return f"[bold red]Aka[/]"
+    elif atleta.cor == "Ao":
+      return f"[bold blue]Ao[/]"
+
   # Mostra os valores de aka e ao
   def valores(self):
-    aka = self.aka
-    ao = self.ao
+    esq = self.esq
+    dir = self.dir
 
     tabela = Table()
-    tabela.add_column(f"[bold red]Aka[/]", width=20, justify="center")
-    tabela.add_column(f"[bold blue]Ao[/]", width=20, justify="center")
+    tabela.add_column(self.cor_atleta(esq), width=20, justify="center")
+    tabela.add_column(self.cor_atleta(dir), width=20, justify="center")
 
     tabela.add_row(
-      str(aka.pontos), str(ao.pontos)
+      str(esq.pontos), str(dir.pontos)
     )
 
     tabela.add_row(
-      "|" if aka.senshu else "", "|" if ao.senshu else ""
+      "|" if esq.senshu else "", "|" if dir.senshu else ""
     )
 
     tabela.add_row(
-      f'{"x" * aka.penalidades}', f'{"x" * ao.penalidades}'
+      f'{"x" * esq.penalidades}', f'{"x" * dir.penalidades}'
     )
 
     return tabela
@@ -125,6 +139,7 @@ class Partida:
         width=40
       )
       console.print(self.valores())
+      print("Pressione espaço para dar yame")
       self.duracao -= 1
       time.sleep(1)
 
@@ -148,7 +163,11 @@ class Partida:
 
   # Perguntas em yame
   def perguntar(self):
-    akao = ["Aka", "Ao"]
+    if self.orientacao == AKA_ESQ:
+      akao = ["Aka", "Ao"]
+    elif self.orientacao == AKA_DIR:
+      akao = ["Ao", "Aka"]
+
     opcao = questionary.select(
       "O que deseja fazer?",
       choices=[
@@ -172,12 +191,13 @@ class Partida:
         "Quem deve pontuar?",
         choices=akao
       ).ask()
+      
       if opcao == None:
         self.placar_yame()
-      elif opcao == "Aka":
-        self.ganhar_ponto(self.aka, self.ao)
+      elif akao.index(opcao) == 0:
+        self.ganhar_ponto(self.esq, self.dir)
       else:
-        self.ganhar_ponto(self.ao, self.aka)
+        self.ganhar_ponto(self.dir, self.esq)
 
     elif opcao == "Penalizar":
       opcao = questionary.select(
@@ -187,10 +207,10 @@ class Partida:
 
       if opcao == None:
         self.placar_yame()
-      elif opcao == "Aka":
-        self.penalidade(self.aka, self.ao)
+      elif akao.index(opcao) == 0:
+        self.penalidade(self.esq, self.dir)
       else:
-        self.penalidade(self.ao, self.aka)
+        self.penalidade(self.dir, self.esq)
 
     elif opcao == "Remover Ponto":
       opcao = questionary.select(
@@ -200,10 +220,10 @@ class Partida:
 
       if opcao == None:
         self.placar_yame()
-      elif opcao == "Aka":
-        self.remove_ponto(self.aka)
+      elif akao.index(opcao) == 0:
+        self.remove_ponto(self.esq)
       else:
-        self.remove_ponto(self.ao)
+        self.remove_ponto(self.dir)
 
     elif opcao == "Senshu":
       opcao = questionary.select(
@@ -213,13 +233,13 @@ class Partida:
 
       if opcao == None:
         self.placar_yame()
-      elif opcao == "Aka":
-        self.modificar_senshu(self.aka, self.ao)
+      elif akao.index(opcao) == 0:
+        self.modificar_senshu(self.esq, self.dir)
       else:
-        self.modificar_senshu(self.ao, self.aka)
+        self.modificar_senshu(self.dir, self.esq)
 
-  # Inicia placar
-  def iniciar_placar_terminal(self):
+  # Inicia placar no terminal
+  def iniciar(self):
 
     while self.duracao > 0 and self.terminada == False:
       self.placar_yame()
@@ -228,5 +248,10 @@ class Partida:
 
     self.placar_yame(pergunta=False) 
     vencedor = self.procura_vencedor()
-    print(f'O vencedor é {vencedor.cor}')
+
+    if vencedor.cor == "Empate":
+      print("Empate!")
+    else:
+      console.print(f'O vencedor é {self.cor_atleta(vencedor)}')
+      
     self.listener.stop()

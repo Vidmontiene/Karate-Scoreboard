@@ -1,7 +1,7 @@
 class Atleta:
 
   # Construtor
-  def __init__(self, cor):
+  def __init__(self, cor : str):
     self.cor = cor
     self.pontos = 0
     self.senshu = False
