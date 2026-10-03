@@ -38,7 +38,7 @@ def main():
 
   print()
 
-  opcoes_orientacao = ["Aka (esquerda) - ao (direita)", "Ao (esquerda) - Aka (direita)"]
+  opcoes_orientacao = ["Aka (esquerda) - Ao (direita)", "Ao (esquerda) - Aka (direita)"]
 
   orientacao = questionary.select(
     "Qual será a orentação da partida?",
