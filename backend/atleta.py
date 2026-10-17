@@ -26,7 +26,7 @@ class Atleta:
   def dar_penalidade(self):
     self.penalidades += 1
 
-  # Remove penalidade
+  # Remover penalidade
   def remove_penalidade(self):
     if self.penalidades > 0:
       self.penalidades -= 1

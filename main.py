@@ -9,8 +9,24 @@ DIR = 1
 class API:
 
   # Construtor
-  def __init__(self, partida : Partida):
-    self.partida = partida
+  def __init__(self):
+    self.duracao = 0
+    self.partida = None
+    self.orientacao = -1
+
+  # Seleciona duracao
+  def set_duracao(self, tempo):
+    self.duracao = tempo
+
+  # Seleciona orientacao
+  def set_orientacao(self, orientacao):
+    self.orientacao = orientacao
+
+  # Inicia o placar
+  def iniciar_placar(self):
+    aka = Atleta("Aka")
+    ao = Atleta("Ao")
+    self.partida = Partida(aka, ao, self.duracao, self.orientacao)
 
   # Retorna o dicionário do placar
   def obter_placar(self):
@@ -18,7 +34,8 @@ class API:
 
     info = {
       "duracao": partida.duracao,
-      "orientacao": partida.orientacao
+      "orientacao": partida.orientacao,
+      "terminada": partida.terminada,
     }
 
     esq = {
@@ -93,15 +110,30 @@ class API:
       dir = partida.dir
       partida.remove_penalidade(dir)
 
-aka = Atleta("Aka")
-ao = Atleta("Ao")
-partida = Partida(aka, ao, 60, 0)
-api = API(partida)
+  # Modifica duração
+  def modifica_duracao(self, tempo : int):
+    self.partida.duracao = tempo
+    if tempo == 0:
+      self.partida.terminada = True
+
+  # Obtém vencedor
+  def obter_vencedor(self):
+    vencedor = self.partida.procura_vencedor()
+    return {
+      "vencedor": vencedor.cor,
+      "orientacao": self.partida.orientacao
+    }
+
+  # Encerra sessão
+  def encerrar(self):
+    import webview
+    webview.windows[0].destroy()
+api = API()
 
 window = webview.create_window(
   "Karate Scoreboard",
-  "frontend/index.html",
+  "frontend/duracao.html",
   js_api=api,
 )
 
-webview.start(debug=True)
+webview.start()

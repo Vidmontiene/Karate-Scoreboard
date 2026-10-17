@@ -44,16 +44,7 @@ html, body {
   border-right: 2px solid white;
 }
 
-#lado_esquerdo > .ponto{
-  background-color: red;
-  border-color: red;
-  width: 90%;
-  height: 30%; 
-}
-
-#lado_direito > .ponto{
-  background-color: blue;
-  border-color: blue;
+.ponto{
   width: 90%;
   height: 30%; 
 }

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="estilos/estilo_configuracoes.css"> 
+  <title>Duração da Partida</title>
+</head>
+<body>
+  <div id="conteudo">
+    <h1>Escolha a duração da partida</h1>
+
+    <div id="div_botoes">
+      <button class="botao" onclick="selecionar_duracao(60)"><p class="txt_botao">1:00</p></button>
+      <button class="botao" onclick="selecionar_duracao(90)"><p class="txt_botao">1:30</p></button>
+      <button class="botao" onclick="selecionar_duracao(120)"><p class="txt_botao">2:00</p></button>
+      <button class="botao" onclick="selecionar_duracao(180)"><p class="txt_botao">3:00</p></button>
+      <button class="botao" id="botao_personalizado">
+        <p class="txt_botao">Personalizado</p>
+      </button>
+      <button class="botao" onclick="encerrar()"><p class="txt_botao">Sair</p></button>
+    </div>
+  </div>
+
+
+  <script src="scripts/scripts_configuracoes.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="estilos/estilo_configuracoes.css"> 
+  <title>Orientação da partida</title>
+</head>
+<body>
+
+  <div id="conteudo">
+    <h1>Escolha a orientação da partida</h1>
+
+    <div id="div_botoes">
+      <button class="botao" onclick="selecionar_orientacao(0)">
+        <p class="aka">Aka esquerda</p>
+        <p class="txt_botao"> - </p>
+        <p class="ao">Ao direita</p>
+      </button>
+
+      <button class="botao" onclick="selecionar_orientacao(1)">
+        <p class="ao">Ao esquerda</p>
+        <p class="txt_botao"> - </p>
+        <p class="aka">Aka direita</p>
+      </button>
+      <button class="botao" onclick="voltar()"><p class="txt_botao">Voltar</p></button>
+    </div>
+  </div>
+
+  <script src="scripts/scripts_configuracoes.js"></script>
+</body>
+</html>

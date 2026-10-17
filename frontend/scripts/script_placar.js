@@ -1,6 +1,14 @@
-ESQ = 0;
-DIR = 1;
+// Constantes
+const ESQ = 0;
+const DIR = 1;
+const AKA_ESQ = 0
+const AKA_DIR = 1
+
+// Variáveis
 let yame = true
+let intervalo = null;
+let tempoRestante = null;
+let intervaloVencedor = null;
 
 // Fila de operações
 let filaOper = Promise.resolve();
@@ -12,14 +20,34 @@ function transforma_duracao(tempo_segundos) {
   return `${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
 }
 
+// Define a orientacao
+async function orienta(){
+  const dados = await window.pywebview.api.obter_placar();
+  const orientacao = dados.orientacao
+
+  const esquerda = document.querySelector("#lado_esquerdo > .ponto");
+  const direita = document.querySelector("#lado_direito > .ponto");
+
+  if (orientacao === AKA_ESQ){
+    esquerda.style.backgroundColor = "red";
+    esquerda.style.borderColor = "red";
+    direita.style.backgroundColor = "blue";
+    direita.style.borderColor = "blue";
+  }
+  else{
+    esquerda.style.backgroundColor = "blue";
+    esquerda.style.borderColor = "blue";
+    direita.style.backgroundColor = "red";
+    direita.style.borderColor = "red";
+  }
+}
+
 // Atualiza o placar com base no objeto Partida
 async function atualizarPlacar() {
 
   // Pega as informações da partida
   const dados = await window.pywebview.api.obter_placar();
 
-  let orientacao = dados.orientacao;
-  
   // Lado esquerdo
   document.getElementById("ponto_esq").textContent =
     dados.esq.pontos;
@@ -45,6 +73,11 @@ async function atualizarPlacar() {
   // Cronômetro
   document.getElementById("cronometro").textContent =
     transforma_duracao(dados.duracao);
+
+  // Pisca vencedor
+  if (dados.terminada){
+    await destaca_vencedor();
+  }
 }
 
 // Pontuar
@@ -112,16 +145,104 @@ function remove_penalidade(alvo) {
   return filaOper;
 }
 
+// Atualiza apenas o cronômetro na tela
+function atualizarCronometro() {
+  document.getElementById("cronometro").textContent =
+    transforma_duracao(tempoRestante);
+}
+
 // Inicia/Para cronometro
-function cronometro(){
-  yame = !yame
-  console.log(yame)
+async function cronometro() {
+
+  // Se está rodando, pausa
+  if (yame) {
+    clearInterval(intervalo);
+    intervalo = null;
+    yame = false;
+
+    if (tempoRestante != null) {
+      filaOper = filaOper.then(() =>
+        window.pywebview.api.modifica_duracao(tempoRestante)
+      );
+
+      await filaOper;
+    }
+
+    return;
+  }
+
+  // Busca a duração na primeira execução
+  if (tempoRestante === null) {
+    const dados = await window.pywebview.api.obter_placar();
+    tempoRestante = dados.duracao;
+  }
+
+  // Não inicia se o tempo acabou
+  if (tempoRestante <= 0) return;
+
+  // Inicia
+  yame = true;
+
+  intervalo = setInterval(() => {
+    tempoRestante--;
+    atualizarCronometro();
+
+    // Enfileira a atualização da duração no Python
+    filaOper = filaOper
+      .then(() => window.pywebview.api.modifica_duracao(tempoRestante))
+      .catch(erro => {
+        console.error("Erro ao atualizar duração:", erro);
+      });
+
+    if (tempoRestante <= 0) {
+      clearInterval(intervalo);
+      intervalo = null;
+      yame = false;
+
+      // Aguarda as operações pendentes antes de atualizar o placar
+      filaOper = filaOper.then(() => atualizarPlacar());
+    }
+  }, 1000);
+}
+
+// Pisca o lado vencedor
+async function destaca_vencedor() {
+  if (intervaloVencedor !== null) return;
+
+  const info = await window.pywebview.api.obter_vencedor();
+  let elemento = null
+
+  if (
+    (info.orientacao == AKA_ESQ && info.vencedor === "Aka") 
+    || 
+    (info.orientacao == AKA_DIR && info.vencedor === "Ao")
+  ){
+    elemento = document.getElementById("lado_esquerdo");
+  }
+  else if (
+    (info.orientacao == AKA_ESQ && info.vencedor === "Ao") 
+    || 
+    (info.orientacao == AKA_DIR && info.vencedor === "Aka")
+  ){
+    elemento = document.getElementById("lado_direito");
+  }
+  else {
+    elemento = document.getElementById("tempo");
+    console.log("Empate")
+  }
+
+  // Pisca vencedor
+  intervaloVencedor = setInterval(() => {
+    elemento.style.visibility =
+      elemento.style.visibility === "hidden" ? "visible" : "hidden";
+  }, 500);
 }
 
 // Listeners
 window.addEventListener("pywebviewready", () => { 
-  atualizarPlacar(); // Quando inicia execução
-
+  orienta() // Coloca as cores no lugar certo
+  atualizarPlacar(); // Inicia placar
+  
   document.getElementById("botao_ponto_esq")
     .addEventListener("click", () => pontua(ESQ)); // Pontua esquerdo
   document.getElementById("botao_ponto_dir")
@@ -163,11 +284,32 @@ window.addEventListener("pywebviewready", () => {
     evento.preventDefault(); // Impede o menu de contexto
     remove_penalidade(DIR);  // Remove penalidade direito
   });
+
+  document.getElementById("tempo")
+    .addEventListener("click", () => cronometro()); // Inicia/Pausa cronometro
 });
 
+// Detecta pressionar de teclas
 document.addEventListener("keydown", (evento) => {
+
+  // Espaço
   if (evento.code === "Space") {
-    cronometro(); // Inicia/Para cronometro
+    evento.preventDefault();
+
+    if (!evento.repeat) {
+      cronometro();   // Inicia/Pausa cronometro
+    }
+  }
+
+  // Esc
+  else if (evento.code === "Escape"){
+    window.location.href = "duracao.html";
   }
 });
 
+// Tira o foco dos botões ao apertar 
+document.querySelectorAll("button").forEach((botao) => {
+  botao.addEventListener("click", () => {
+    botao.blur();
+  });
+});

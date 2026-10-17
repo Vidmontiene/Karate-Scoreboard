@@ -76,18 +76,32 @@ class Partida:
 
   # Analisa quem ganhou
   def procura_vencedor(self):
+    
+    # Penalidades
     if self.esq.penalidades >= 5:
       self.vencedor = self.dir
     elif self.dir.penalidades >= 5:
       self.vencedor = self.esq
+
+    # Diferenças de pontos
+    elif self.esq.pontos - self.dir.pontos >= 8:
+      self.vencedor = self.esq
+    elif self.dir.pontos - self.esq.pontos >= 8:
+      self.vencedor = self.dir
+
+    # Pontuação máxima
     elif self.esq.pontos > self.dir.pontos:
       self.vencedor = self.esq
     elif self.dir.pontos > self.esq.pontos:
       self.vencedor = self.dir
+
+    # Senshu em caso de empate
     elif self.esq.senshu:
       self.vencedor = self.esq
     elif self.dir.senshu:
       self.vencedor = self.dir
+
+    # Empate
     else:
       self.vencedor = Atleta("Empate")
 
