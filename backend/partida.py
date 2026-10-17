@@ -1,4 +1,4 @@
-from atleta import Atleta
+from .atleta import Atleta
 import time
 from pynput import keyboard
 import questionary
@@ -49,15 +49,21 @@ class Partida:
   # Remover pontos
   def remove_ponto(self, alvo : Atleta, pontos : int = 1):
     alvo.remove_ponto(pontos)
+    if alvo.senshu and alvo.pontos == 0:
+      alvo.set_senshu(False)
 
-  # Penalidade
+  # Dar penalidade
   def penalidade(self, alvo : Atleta, outro : Atleta):
-    alvo.penalidade()
+    alvo.dar_penalidade()
 
     # Máximo de 5
     if alvo.penalidades >= 5:
       self.vencedor = outro
       self.terminada = True
+
+  # Remover penalidade
+  def remove_penalidade(self, alvo : Atleta):
+    alvo.remove_penalidade()
 
   # Modifica o valor do senshu. Garante que somente um atleta o possui
   def modificar_senshu(self, alvo : Atleta, outro : Atleta):
@@ -175,6 +181,7 @@ class Partida:
         "Pontuar",
         "Penalizar",
         "Remover Ponto",
+        "Remover Penalidade",
         "Senshu",
         "Encerrar"
       ]
@@ -224,6 +231,19 @@ class Partida:
         self.remove_ponto(self.esq)
       else:
         self.remove_ponto(self.dir)
+
+    elif opcao == "Remover Penalidade":
+      opcao = questionary.select(
+        "Quem vai perder a penalidade?",
+        choices=akao
+      ).ask()
+
+      if opcao == None:
+        self.placar_yame()
+      elif akao.index(opcao) == 0:
+        self.remove_penalidade(self.esq)
+      else:
+        self.remove_penalidade(self.dir)
 
     elif opcao == "Senshu":
       opcao = questionary.select(

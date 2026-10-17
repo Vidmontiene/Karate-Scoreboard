@@ -1,5 +1,5 @@
-from partida import Partida
-from atleta import Atleta
+from .partida import Partida
+from .atleta import Atleta
 import questionary
 
 # Transforma duração mm:ss em segundo
