@@ -19,7 +19,7 @@ Placar de karate para a categoria de kumite (WKF).
 
 ![Demonstração do Karate Scoreboard Terminal](gifs_readme/placar_terminal.gif)
 
-### Placar pela aplicação
+### Vídeo placar pela aplicação
 
 ![Demonstração do Karate Scoreboard Aplicação](gifs_readme/placar_aplicacao.gif)
 
