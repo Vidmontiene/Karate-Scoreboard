@@ -58,7 +58,7 @@ Placar de karate para a categoria de kumite (WKF).
 
 2. Atalhos na execução do placar:
   - Clique esquerdo do mouse: Adicionar ponto/penalidade ou modificar senshu
-  - Clique edireito do mouse: Remover ponto/penalidade ou modificar senshu
+  - Clique direito do mouse: Remover ponto/penalidade ou modificar senshu
   - Espaço: Pausar/resumir placar
   - Esc: Voltar à tela inicial
 
