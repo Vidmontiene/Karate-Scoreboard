@@ -62,6 +62,18 @@ Placar de karate para a categoria de kumite (WKF).
   - Espaço: Pausar/resumir placar
   - Esc: Voltar à tela inicial
 
+## ⬇️ Download
+
+Baixe a versão mais recente do Karate Scoreboard
+na página de [Releases](https://github.com/Vidmontiene/Karate-Scoreboard/releases).
+
+1. Baixe o arquivo ZIP para Windows.
+2. Se o Windows bloquear o arquivo baixado, clique com o botão direito no ZIP, selecione Propriedades, marque a opção Desbloquear (se disponível) e clique em Aplicar.
+3. Extraia todo o conteúdo.
+4. Execute `KarateScoreboard.exe`.
+
+> Não exclua os arquivos e pastas que acompanham o executável.
+
 ## 🛠️ Tecnologias Utilizadas
 
 - Python

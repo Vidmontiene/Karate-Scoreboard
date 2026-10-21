@@ -41,7 +41,7 @@ def main():
   opcoes_orientacao = ["Aka (esquerda) - Ao (direita)", "Ao (esquerda) - Aka (direita)"]
 
   orientacao = questionary.select(
-    "Qual será a orentação da partida?",
+    "Qual será a orientação da partida?",
     choices=opcoes_orientacao
   ).ask()
 
