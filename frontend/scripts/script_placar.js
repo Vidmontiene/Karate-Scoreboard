@@ -155,10 +155,10 @@ function atualizarCronometro() {
 async function cronometro() {
 
   // Se está rodando, pausa
-  if (yame) {
+  if (!yame) {
     clearInterval(intervalo);
     intervalo = null;
-    yame = false;
+    yame = true;
 
     if (tempoRestante != null) {
       filaOper = filaOper.then(() =>
@@ -181,7 +181,7 @@ async function cronometro() {
   if (tempoRestante <= 0) return;
 
   // Inicia
-  yame = true;
+  yame = false;
 
   intervalo = setInterval(() => {
     tempoRestante--;
@@ -197,7 +197,7 @@ async function cronometro() {
     if (tempoRestante <= 0) {
       clearInterval(intervalo);
       intervalo = null;
-      yame = false;
+      yame = true;
 
       // Aguarda as operações pendentes antes de atualizar o placar
       filaOper = filaOper.then(() => atualizarPlacar());
@@ -227,7 +227,7 @@ async function destaca_vencedor() {
     elemento = document.getElementById("lado_direito");
   }
   else {
-    elemento = document.getElementById("tempo");
+    elemento = document.getElementById("cronometro");
     console.log("Empate")
   }
 
@@ -239,9 +239,9 @@ async function destaca_vencedor() {
 }
 
 // Listeners
-window.addEventListener("pywebviewready", () => { 
+window.addEventListener("pywebviewready", async () => { 
   orienta() // Coloca as cores no lugar certo
-  atualizarPlacar(); // Inicia placar
+  await atualizarPlacar(); // Inicia placar
   
   document.getElementById("botao_ponto_esq")
     .addEventListener("click", () => pontua(ESQ)); // Pontua esquerdo
@@ -287,29 +287,29 @@ window.addEventListener("pywebviewready", () => {
 
   document.getElementById("tempo")
     .addEventListener("click", () => cronometro()); // Inicia/Pausa cronometro
-});
 
-// Detecta pressionar de teclas
-document.addEventListener("keydown", (evento) => {
+  // Detecta pressionar de teclas
+  document.addEventListener("keydown", (evento) => {
 
-  // Espaço
-  if (evento.code === "Space") {
-    evento.preventDefault();
+    // Espaço
+    if (evento.code === "Space") {
+      evento.preventDefault();
 
-    if (!evento.repeat) {
-      cronometro();   // Inicia/Pausa cronometro
+      if (!evento.repeat) {
+        cronometro();   // Inicia/Pausa cronometro
+      }
     }
-  }
 
-  // Esc
-  else if (evento.code === "Escape"){
-    window.location.href = "duracao.html";
-  }
-});
+    // Esc
+    else if (evento.code === "Escape"){
+      window.location.href = "duracao.html";
+    }
+  });
 
-// Tira o foco dos botões ao apertar 
-document.querySelectorAll("button").forEach((botao) => {
-  botao.addEventListener("click", () => {
-    botao.blur();
+  // Tira o foco dos botões ao apertar 
+  document.querySelectorAll("button").forEach((botao) => {
+    botao.addEventListener("click", () => {
+      botao.blur();
+    });
   });
 });
